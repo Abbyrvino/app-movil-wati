@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "938718065620",
+    "project_id": "app-movil-wati",
+    "storage_bucket": "app-movil-wati.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:938718065620:android:b072ff96f5e4eb6f385c41",
+        "android_client_info": {
+          "package_name": "com.example.app_movil_wati"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXPqbFh7eH70FOutHx6uH0WtibSFUa8xw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
