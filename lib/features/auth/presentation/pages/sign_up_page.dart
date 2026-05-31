@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -10,13 +11,18 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _acceptedTerms = false;
+  
+  // Variable nueva para controlar la animación de carga del botón
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -26,6 +32,71 @@ class _SignUpPageState extends State<SignUpPage> {
     _confirmController.dispose();
     super.dispose();
   }
+
+  // --- NUEVA LÓGICA DE FIREBASE ---
+  Future<void> _registrarUsuario() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String confirmPassword = _confirmController.text.trim();
+
+    // 1. Validaciones básicas antes de enviar a internet
+    if (email.isEmpty || password.isEmpty || _nameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, llena todos los campos.'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Las contraseñas no coinciden.'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    // Activamos la ruedita de carga
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 2. Enviamos la orden a Firebase
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+      
+      // 3. Mensaje de éxito y regresamos a la pantalla anterior
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Cuenta creada con éxito! 🎉'), backgroundColor: Colors.green),
+      );
+      Navigator.of(context).pop();
+
+    } on FirebaseAuthException catch (e) {
+      // 4. Manejo de errores de Firebase
+      String errorMessage = 'Ocurrió un error inesperado.';
+      if (e.code == 'weak-password') {
+        errorMessage = 'La contraseña es demasiado débil (mínimo 6 caracteres).';
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = 'Ya existe una cuenta con este correo electrónico.';
+      }
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+      );
+    } finally {
+      // Apagamos la ruedita de carga pase lo que pase
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+  // --- FIN NUEVA LÓGICA ---
 
   @override
   Widget build(BuildContext context) {
@@ -135,12 +206,12 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               const SizedBox(height: 24),
 
-              // Button
+              // Button modificado para ejecutar Firebase y mostrar carga
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: _acceptedTerms ? () => debugPrint('Registrar') : null,
+                  onPressed: (_acceptedTerms && !_isLoading) ? _registrarUsuario : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textWhite,
@@ -148,7 +219,13 @@ class _SignUpPageState extends State<SignUpPage> {
                     shape: const StadiumBorder(),
                     elevation: 4,
                   ),
-                  child: Text('Crear cuenta', style: AppTextStyles.button),
+                  child: _isLoading 
+                      ? const SizedBox(
+                          height: 24, 
+                          width: 24, 
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                        )
+                      : Text('Crear cuenta', style: AppTextStyles.button),
                 ),
               ),
               const SizedBox(height: 32),

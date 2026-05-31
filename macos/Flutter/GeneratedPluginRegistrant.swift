@@ -5,17 +5,14 @@
 import FlutterMacOS
 import Foundation
 
-<<<<<<< HEAD
 import firebase_auth
 import firebase_core
+import flutter_secure_storage_macos
+import path_provider_foundation
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FLTFirebaseAuthPlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseAuthPlugin"))
   FLTFirebaseCorePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseCorePlugin"))
-=======
-import flutter_secure_storage_macos
-
-func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterSecureStoragePlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStoragePlugin"))
->>>>>>> 6fb70d044d331eea664343e6afe584d4e7f951ab
+  PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
 }
